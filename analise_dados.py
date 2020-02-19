@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 def analisa_resultado(resultado):
     dados = {"pares": 0,
              "impares": 0,
+             "numeros": {},
              "dezenas": {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0},
              "quadrantes": {'1': 0, '2': 0, '3': 0, '4': 0},
              "linhas": {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0}}
@@ -18,6 +19,8 @@ def analisa_resultado(resultado):
         else:
             dados['impares'] += 1
 
+        dados['numeros'][str(numero)] = dados['numeros'].get(numero, 0) + 1
+
         dados['dezenas'][str((numero // 10) % 10)] += 1
 
         if numero <= 10:
@@ -26,9 +29,9 @@ def analisa_resultado(resultado):
             dados['linhas']['1'] += 1
         elif numero <= 30:
             dados['linhas']['2'] += 1
-        elif numero <= 30:
-            dados['linhas']['3'] += 1
         elif numero <= 40:
+            dados['linhas']['3'] += 1
+        elif numero <= 50:
             dados['linhas']['4'] += 1
         else:
             dados['linhas']['5'] += 1
