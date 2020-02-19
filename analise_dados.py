@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import os
 import sys
+from datetime import datetime
 from dotenv import load_dotenv
 
 
@@ -80,7 +81,12 @@ def analisa():
         analise = {}
 
         analise['concurso'] = resultado['concurso']
-        analise['data'] = resultado['data']
+        timestamp_resultado = resultado['data']
+        analise['data'] = timestamp_resultado
+        data_resultado = datetime.fromtimestamp(timestamp_resultado/1000.0)
+        analise['ano'] = data_resultado.strftime("%Y")
+        analise['mes'] = data_resultado.strftime("%m")
+        analise['dia'] = data_resultado.strftime("%d")
         analise['valor_arrecadado'] = resultado['vr_arrecadado']
         analise['resultado'] = [
             int(x) for x in resultado['resultadoOrdenado'].split("-")]
