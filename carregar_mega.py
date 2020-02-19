@@ -3,7 +3,9 @@ from pymongo import MongoClient
 import json
 import sys
 import os
+import time
 from dotenv import load_dotenv
+from analise_dados import analisa
 
 load_dotenv()
 
@@ -16,7 +18,7 @@ if __name__ == '__main__':
 
     megasena = db.megasena
 
-    ultimo_concurso = megasena.find({}, {"concurso": 1}).sort([
+    ultimo_concurso = megasena.find({}, {"concurso": 1, "_id": 0}).sort([
         ("concurso", -1)]).limit(1)
 
     concurso = 0
@@ -31,16 +33,25 @@ if __name__ == '__main__':
 
         req = requests.get(url)
 
+        if req.status_code == 504:
+            print("sleep 10s")
+            time.sleep(10)
+            req = requests.get(url)
+
+        if req.status_code == 504:
+            print("sleep 20s")
+            time.sleep(20)
+            req = requests.get(url)
+
         resultado = json.loads(req.content)
 
         if resultado['concurso'] == None:
-            sys.exit()  # Concurso ainda não existe
-
-        resultado['_id'] = concurso
+            break  # Concurso ainda não existe
 
         megasena.insert_one(resultado)
 
         print(concurso)
 
         if str(concurso) == resultado['proximoConcurso']:
-            sys.exit()
+            analisa()
+            break
