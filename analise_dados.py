@@ -3,6 +3,7 @@ import os
 import sys
 from datetime import datetime
 from dotenv import load_dotenv
+from analise_global import gera_analise_espacial
 
 
 def analisa_resultado(resultado):
@@ -114,6 +115,7 @@ def analisa():
 
     db.drop_collection("megasena_analisada")
     megasena_analisada.insert_many(analises)
+    gera_analise_espacial(analises)
 
 
 if __name__ == '__main__':

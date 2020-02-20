@@ -8,8 +8,7 @@ import operator
 from dotenv import load_dotenv
 
 
-def gera_analises_espaciais(megasena_analisada):
-    resultados = megasena_analisada.find({}).sort([("concurso", 1)])
+def gera_analise_espacial(resultados):
 
     dados = {"pares": 0,
              "impares": 0,
@@ -30,20 +29,7 @@ def gera_analises_espaciais(megasena_analisada):
                                                     map(collections.Counter, [dados["quadrantes"], resultado["dados"]["quadrantes"]])))
         dados["linhas"] = dict(functools.reduce(operator.add,
                                                 map(collections.Counter, [dados["linhas"], resultado["dados"]["linhas"]])))
-
-    print(dados)
-    # print({k: v for k, v in sorted(dados['numeros'].items(), key=lambda item: item[1])})
-    # print({k: v for k, v in sorted(dados['numeros'].items())})
-
-    numeros = ({int(k): v for k, v in
-                dados['numeros'].items()})
-
-    print({k: v for k, v in sorted(
-        numeros.items())})
-
-
-def gera_series_temporais(megasena_analisada):
-    pass
+    return dados
 
 
 if __name__ == '__main__':
@@ -55,7 +41,27 @@ if __name__ == '__main__':
 
     db = client.loterias
 
+    resultados = list(db.megasena_analisada.find({}).sort([("concurso", 1)]))
+
     analises = {
-        "analises_espaciais": gera_analises_espaciais(db.megasena_analisada),
-        "series_temporais": gera_series_temporais(db.megasena_analisada)
+        "data": datetime.timestamp(datetime.now()),
+        "analise_espacial_global": gera_analise_espacial(resultados),
+        "analise_espacial_ultimos_10": gera_analise_espacial(resultados[-10:]),
+        "analise_espacial_ultimos_20": gera_analise_espacial(resultados[-20:]),
+        "analise_espacial_ultimos_50": gera_analise_espacial(resultados[-50:]),
+        "analise_espacial_ultimos_100": gera_analise_espacial(resultados[-100:]),
+        "analise_espacial_ultimos_500": gera_analise_espacial(resultados[-500:]),
+        "analise_espacial_ultimos_1000": gera_analise_espacial(resultados[-1000:])
     }
+
+    db.megasena_consolidado.insert_one(analises)
+
+    # print(dados)
+    # print({k: v for k, v in sorted(dados['numeros'].items(), key=lambda item: item[1])})
+    # print({k: v for k, v in sorted(dados['numeros'].items())})
+
+    # numeros = ({int(k): v for k, v in
+    #            dados['numeros'].items()})
+
+    # print({k: v for k, v in sorted(
+    #    numeros.items())})
