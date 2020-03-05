@@ -24,7 +24,7 @@ if __name__ == '__main__':
     concurso = 0
 
     for ultimo in ultimo_concurso:
-        concurso = ultimo['concurso']
+        concurso = ultimo['concurso'] - 2
 
     while True:
         concurso += 1
@@ -48,7 +48,8 @@ if __name__ == '__main__':
         if resultado['concurso'] == None:
             break  # Concurso ainda não existe
 
-        megasena.insert_one(resultado)
+        megasena.update_one(
+            {r"concurso": resultado["concurso"]}, {"$set": resultado}, upsert=True)
 
         print(concurso)
 
