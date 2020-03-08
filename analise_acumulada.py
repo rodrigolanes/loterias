@@ -32,14 +32,8 @@ def gera_analise_espacial(resultados):
     return dados
 
 
-if __name__ == '__main__':
-    load_dotenv()
-
-    urlConnection = os.getenv("URL_CONNECTION_LOTERIAS")
-
-    client = MongoClient(urlConnection)
-
-    db = client.loterias
+def analise_global(db):
+    print("Consolida Concursos")
 
     resultados = list(db.megasena_analisada.find({}).sort([("concurso", 1)]))
 
@@ -55,6 +49,18 @@ if __name__ == '__main__':
     }
 
     db.megasena_consolidado.insert_one(analises)
+
+
+if __name__ == '__main__':
+    load_dotenv()
+
+    urlConnection = os.getenv("URL_CONNECTION_LOTERIAS")
+
+    client = MongoClient(urlConnection)
+
+    db = client.loterias
+
+    analise_global(db)
 
     # print(dados)
     # print({k: v for k, v in sorted(dados['numeros'].items(), key=lambda item: item[1])})

@@ -5,7 +5,8 @@ import sys
 import os
 import time
 from dotenv import load_dotenv
-from analise_dados import analisa
+from analise_concursos import analisa
+from analise_acumulada import analise_global
 
 load_dotenv()
 
@@ -24,7 +25,9 @@ if __name__ == '__main__':
     concurso = 0
 
     for ultimo in ultimo_concurso:
-        concurso = ultimo['concurso'] - 2
+        ultimo_concurso = ultimo['concurso']
+
+    concurso = ultimo_concurso - 2
 
     while True:
         concurso += 1
@@ -53,6 +56,7 @@ if __name__ == '__main__':
 
         print(concurso)
 
-        if str(concurso) == resultado['proximoConcurso']:
-            analisa()
+        if str(concurso) == resultado['proximoConcurso'] and concurso > ultimo_concurso:
+            analisa(db)
+            analise_global(db)
             break
