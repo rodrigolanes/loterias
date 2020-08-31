@@ -1,22 +1,27 @@
-import requests
-from pymongo import MongoClient
 import json
-import sys
-import os
-import time
 import logging
+import os
+import sys
+import time
+
+import requests
 from dotenv import load_dotenv
-from analise_concursos import analisa
-from analise_acumulada import analise_global
+from pymongo import MongoClient
 from telegram.ext import Updater
+
+from analise_acumulada import analise_global
+from analise_concursos import analisa
+from utils.format import formata_concurso_text
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 if __name__ == '__main__':
     urlConnection = os.getenv("URL_CONNECTION_LOTERIAS")
     telegram_token = os.getenv("TELEGRAM_TOKEN")
+    owner_user_id = os.getenv("OWNER_USER_ID")
 
     client = MongoClient(urlConnection)
 
@@ -61,12 +66,13 @@ if __name__ == '__main__':
 
         print(concurso)
 
-        updater = Updater(token=telegram_token, use_context=True)
-        updater.bot.send_message(chat_id=30590267, text=resultado)
-        updater.stop()
-
         # Quando no último concurso que aconteceu, tanto a variável concurso quando próximo concurso ficam com os números iguais.
         if str(concurso) == resultado['proximoConcurso'] and concurso > ultimo_concurso:
+            updater = Updater(token=telegram_token, use_context=True)
+            updater.bot.send_message(chat_id=owner_user_id, text=formata_concurso_text(
+                resultado), parse_mode="MARKDOWN")
+            updater.stop()
+
             analisa(db)
             analise_global(db)
             break
