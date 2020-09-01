@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from telegram.ext import (CommandHandler, Filters, MessageHandler,
                           PicklePersistence, Updater)
 
+from utils.format import formata_concurso_text
+
 load_dotenv()
 
 my_persistence = PicklePersistence(filename='data.bak')
@@ -48,7 +50,11 @@ def echo(update, context):
 
 def ultimo_concurso(update, context):
     """Responde o último consurso da mega_sena."""
-    update.message.reply_text('Último!')
+    if not "ultimo" in context.bot_data:
+        update.message.reply_text('Último não existe!')
+    else:
+        update.message.reply_text(
+            formata_concurso_text(context.bot_data["ultimo"]))
 
 
 def main():
