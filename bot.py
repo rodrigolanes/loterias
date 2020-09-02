@@ -2,14 +2,12 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from telegram.ext import (CommandHandler, Filters, MessageHandler,
-                          PicklePersistence, Updater)
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 from utils.format import formata_concurso_text
+from utils.sqlite_helper import add_usuario, get_last_concurso
 
 load_dotenv()
-
-my_persistence = PicklePersistence(filename='data.bak')
 
 telegram_token = os.getenv("TELEGRAM_TOKEN")
 
@@ -24,17 +22,12 @@ logger = logging.getLogger(__name__)
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
     """Send a message when the command /start is issued."""
-
-    if not "users_id" in context.bot_data:
-        context.bot_data["users_id"] = set()
-
-    context.bot_data["users_id"].add(update.message.from_user.id)
-
     mensagem = """Oi, Sou o bot da Boa Sorte!
 
 Eu envio mensagem sobre os jogos da Mega Sena sempre que um novo resultado é publicado no site da Caixa Econômica Federal.
 
 Aguarde pelo próximo concurso e enviarei o resultado."""
+    add_usuario(update.message.from_user.id)
     update.message.reply_text(mensagem)
 
 
@@ -50,24 +43,21 @@ def echo(update, context):
 
 def ultimo_concurso(update, context):
     """Responde o último consurso da mega_sena."""
-    if not "ultimo" in context.bot_data:
-        update.message.reply_text('Último não existe!')
-    else:
-        update.message.reply_text(
-            formata_concurso_text(context.bot_data["ultimo"]))
+    update.message.reply_text(
+        formata_concurso_text(get_last_concurso()), parse_mode="MARKDOWN")
 
 
 def main():
     """Start the bot."""
     updater = Updater(
-        telegram_token, persistence=my_persistence, use_context=True)
+        telegram_token, use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
-    # dp.add_handler(CommandHandler("help", help_command))
+    dp.add_handler(CommandHandler("help", help_command))
     dp.add_handler(CommandHandler("ultimo", ultimo_concurso))
 
     # on noncommand i.e message - echo the message on Telegram

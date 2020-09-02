@@ -5,20 +5,20 @@ import sys
 import time
 
 import requests
+import telegram
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from telegram.ext import PicklePersistence, Updater
+from telegram.ext import Updater
 
 from analise_acumulada import analise_global
 from analise_concursos import analisa
 from utils.format import formata_concurso_text
+from utils.sqlite_helper import add_concurso, get_all_usuarios, remove_usuario
 
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-my_persistence = PicklePersistence(filename='data.bak')
 
 if __name__ == '__main__':
     urlConnection = os.getenv("URL_CONNECTION_LOTERIAS")
@@ -70,23 +70,20 @@ if __name__ == '__main__':
 
         # Quando no último concurso que aconteceu, tanto a variável concurso quando próximo concurso ficam com os números iguais.
         if str(concurso) == resultado['proximoConcurso'] and concurso > ultimo_concurso:
-            updater = Updater(token=telegram_token,
-                              persistence=my_persistence, use_context=True)
 
-            dados_salvos = updater.persistence.get_bot_data()
+            salva_concurso(resultado)
 
-            dados_salvos["ultimo"] = resultado
+            updater = Updater(token=telegram_token, use_context=True)
 
-            updater.persistence.update_bot_data(dados_salvos)
-            updater.persistence.flush()
-
-            for user_id in dados_salvos["users_id"]:
+            for user_id in get_all_usuarios():
                 print(f"user: {user_id}")
-                updater.bot.send_message(chat_id=user_id, text=formata_concurso_text(
-                    resultado), parse_mode="MARKDOWN")
+                try:
+                    updater.bot.send_message(chat_id=user_id, text=formata_concurso_text(
+                        resultado), parse_mode="MARKDOWN")
+                except telegram.error.Unauthorized:
+                    print("Oops! Envio bloqueado pelo usuário...")
+                    remove_usuario(user_id)
 
-            # updater.bot.send_message(chat_id=owner_user_id, text=formata_concurso_text(
-            #     resultado), parse_mode="MARKDOWN")
             updater.stop()
 
             analisa(db)
