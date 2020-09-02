@@ -20,6 +20,8 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+logger = logging.getLogger('carrega_mega')
+
 if __name__ == '__main__':
     urlConnection = os.getenv("URL_CONNECTION_LOTERIAS")
     telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -66,7 +68,7 @@ if __name__ == '__main__':
         megasena.update_one(
             {r"concurso": resultado["concurso"]}, {"$set": resultado}, upsert=True)
 
-        print(concurso)
+        logger.info(concurso)
 
         # Quando no último concurso que aconteceu, tanto a variável concurso quando próximo concurso ficam com os números iguais.
         if str(concurso) == resultado['proximoConcurso'] and concurso > ultimo_concurso:
