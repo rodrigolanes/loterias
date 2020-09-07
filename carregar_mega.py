@@ -73,15 +73,14 @@ if __name__ == '__main__':
         # Quando no último concurso que aconteceu, tanto a variável concurso quando próximo concurso ficam com os números iguais.
         if str(concurso) == resultado['proximoConcurso'] and concurso > ultimo_concurso:
 
-            salva_concurso(resultado)
+            add_concurso(resultado)
 
             updater = Updater(token=telegram_token, use_context=True)
 
             for user_id in get_all_usuarios():
                 print(f"user: {user_id}")
                 try:
-                    updater.bot.send_message(chat_id=user_id, text=formata_concurso_text(
-                        resultado), parse_mode="MARKDOWN")
+                    updater.bot.send_message(chat_id=user_id, text=formata_concurso_text(resultado), parse_mode="MARKDOWN")
                 except telegram.error.Unauthorized:
                     print("Oops! Envio bloqueado pelo usuário...")
                     remove_usuario(user_id)

@@ -1,7 +1,7 @@
 import json
 import sqlite3
 
-database_name = 'bot.db'
+database_name = '/home/rodrigo/projetos/loterias/bot.db'
 
 
 def add_concurso(concurso):
